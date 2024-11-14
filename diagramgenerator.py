@@ -6,7 +6,8 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import os
 
 dataset_dir = 'data'
-os.makedirs(dataset_dir, exist_ok=True)
+os.makedirs(dataset_dir+'_in', exist_ok=True)
+os.makedirs(dataset_dir+'_out', exist_ok=True)
 
 image_dir = 'node_images'
 
@@ -103,7 +104,7 @@ def create_random_network_diagram(file_index):
     nx.draw_networkx_edges(G, pos, ax=ax, edge_color="gray")
 
     plt.axis('off')
-    plt.savefig(f"{dataset_dir}/network_diagram_{file_index}.png", bbox_inches="tight")
+    plt.savefig(f"{dataset_dir}_in/network_diagram_{file_index}.png", bbox_inches="tight")
     plt.close()
 
     plt.figure(figsize=(10, 8))
@@ -126,7 +127,7 @@ def create_random_network_diagram(file_index):
     nx.draw_networkx_edges(G, pos, ax=ax, edge_color="gray")
 
     plt.axis('off')
-    plt.savefig(f"{dataset_dir}/network_diagram_colored_{file_index}.png", bbox_inches="tight")
+    plt.savefig(f"{dataset_dir}_out/network_diagram_{file_index}.png", bbox_inches="tight")
     plt.close()
 
 num_diagrams = 20
