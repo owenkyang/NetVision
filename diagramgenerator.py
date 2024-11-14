@@ -8,6 +8,8 @@ import os
 dataset_dir = 'data'
 os.makedirs(dataset_dir+'_in', exist_ok=True)
 os.makedirs(dataset_dir+'_out', exist_ok=True)
+os.makedirs(dataset_dir+'_graph', exist_ok=True)
+os.makedirs(dataset_dir+'_box', exist_ok=True)
 
 image_dir = 'node_images'
 
@@ -91,7 +93,10 @@ def create_random_network_diagram(file_index):
 
     pos = nx.spring_layout(G, seed=random.randint(0, 100), k=0.8, iterations=20)
     
-    plt.figure(figsize=(10, 8))
+    fig_width = random.uniform(6, 12)  # Set a range for width (inches)
+    fig_height = random.uniform(6, 10)  # Set a range for height (inches)
+    
+    plt.figure(figsize=(fig_width, fig_height))
     ax = plt.gca()
 
     for node, (x, y) in pos.items():
@@ -114,7 +119,7 @@ def create_random_network_diagram(file_index):
     plt.savefig(f"{dataset_dir}_in/network_diagram_{file_index}.png", bbox_inches="tight")
     plt.close()
 
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=(fig_width, fig_height))
     ax = plt.gca()
 
     for node, (x, y) in pos.items():
@@ -136,6 +141,17 @@ def create_random_network_diagram(file_index):
     plt.axis('off')
     plt.savefig(f"{dataset_dir}_out/network_diagram_{file_index}.png", bbox_inches="tight")
     plt.close()
+
+    adjacency_list = {}
+    for node in G.nodes:
+        ip = G.nodes[node]['label'].split('\n')[1]
+        neighbors = [G.nodes[neighbor]['label'].split('\n')[1] for neighbor in G.neighbors(node)]
+        adjacency_list[ip] = neighbors
+
+    with open(f"{dataset_dir}_graph/network_diagram_{file_index}.txt", "w") as f:
+        for ip, neighbors in adjacency_list.items():
+            f.write(f"{ip}: {', '.join(neighbors)}\n")
+
 
 num_diagrams = 20
 
