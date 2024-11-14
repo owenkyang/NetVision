@@ -19,6 +19,8 @@ device_colors = {
     "server": [0.5, 0, 0.5, 1]
 }
 
+used_ips = set()
+
 def get_image(name):
     img_path = os.path.join(image_dir, f"{name}.png")
     return plt.imread(img_path)
@@ -29,8 +31,13 @@ def apply_color_overlay(image, color):
     colored_image[..., 3] = image[..., 3]
     return colored_image
 
+
 def generate_random_ip():
-    return f"{random.randint(192, 223)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 254)}"
+    while True:
+        ip = f"{random.randint(192, 223)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 254)}"
+        if ip not in used_ips:
+            used_ips.add(ip)
+            return ip
 
 def create_random_network_diagram(file_index):
     G = nx.Graph()
