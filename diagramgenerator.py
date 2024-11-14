@@ -1,4 +1,5 @@
 import networkx as nx
+import numpy as np
 import matplotlib.pyplot as plt
 import random
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
@@ -9,9 +10,23 @@ os.makedirs(dataset_dir, exist_ok=True)
 
 image_dir = 'node_images'
 
+device_colors = {
+    "router": [0, 0, 1, 1],
+    "switch": [1, 0.5, 0, 1],
+    "computer": [0, 1, 0, 1],
+    "firewall": [1, 0, 0, 1],
+    "server": [0.5, 0, 0.5, 1]
+}
+
 def get_image(name):
     img_path = os.path.join(image_dir, f"{name}.png")
     return plt.imread(img_path)
+
+def apply_color_overlay(image, color):
+    colored_image = np.zeros_like(image)
+    colored_image[..., :3] = color[:3]
+    colored_image[..., 3] = image[..., 3]
+    return colored_image
 
 def generate_random_ip():
     return f"{random.randint(192, 223)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 254)}"
@@ -91,10 +106,33 @@ def create_random_network_diagram(file_index):
     plt.savefig(f"{dataset_dir}/network_diagram_{file_index}.png", bbox_inches="tight")
     plt.close()
 
+    plt.figure(figsize=(10, 8))
+    ax = plt.gca()
+
+    for node, (x, y) in pos.items():
+        device_type = G.nodes[node]['device_type']
+        image = get_image(device_type)
+        
+        color_overlay_image = apply_color_overlay(image, device_colors[device_type])
+
+        im = OffsetImage(color_overlay_image, zoom=0.08)
+        ab = AnnotationBbox(im, (x, y), frameon=False, zorder=3)
+        ax.add_artist(ab)
+        
+        label_y_offset = -0.15 if y > 0 else 0.15
+        ax.text(x, y + label_y_offset, G.nodes[node]['label'], ha="center", fontsize=8, clip_on=True, zorder=4)
+
+    plt.subplots_adjust(left=0.2, right=0.8, top=0.8, bottom=0.2)
+    nx.draw_networkx_edges(G, pos, ax=ax, edge_color="gray")
+
+    plt.axis('off')
+    plt.savefig(f"{dataset_dir}/network_diagram_colored_{file_index}.png", bbox_inches="tight")
+    plt.close()
+
 num_diagrams = 20
 
 for i in range(num_diagrams):
-    create_random_network_diagram(i)
+    create_random_network_diagram(i+1)
 
 print(f"Generated {num_diagrams} unique network diagrams with custom images in the '{dataset_dir}' directory.")
 
