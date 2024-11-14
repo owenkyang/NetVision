@@ -7,7 +7,6 @@ import os
 dataset_dir = 'data'
 os.makedirs(dataset_dir, exist_ok=True)
 
-
 image_dir = 'node_images'
 
 def get_image(name):
@@ -59,6 +58,14 @@ def create_random_network_diagram(file_index):
         for server in connected_servers:
             G.add_edge(switch, server)
 
+    if not nx.is_connected(G):
+        components = list(nx.connected_components(G))
+        for i in range(1, len(components)):
+            node_from_component = random.choice(list(components[i]))
+            node_from_main = random.choice(list(components[0]))
+            G.add_edge(node_from_component, node_from_main)
+
+
     pos = nx.spring_layout(G, seed=random.randint(0, 100), k=0.8, iterations=20)
     
     plt.figure(figsize=(10, 8))
@@ -84,10 +91,12 @@ def create_random_network_diagram(file_index):
     plt.savefig(f"{dataset_dir}/network_diagram_{file_index}.png", bbox_inches="tight")
     plt.close()
 
-for i in range(2000):
+num_diagrams = 20
+
+for i in range(num_diagrams):
     create_random_network_diagram(i)
 
-print(f"Generated 10 unique network diagrams with custom images in the '{dataset_dir}' directory.")
+print(f"Generated {num_diagrams} unique network diagrams with custom images in the '{dataset_dir}' directory.")
 
 
 
