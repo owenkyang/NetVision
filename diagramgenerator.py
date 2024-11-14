@@ -1,4 +1,5 @@
 import networkx as nx
+import numpy as np
 import matplotlib.pyplot as plt
 import random
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
@@ -7,24 +8,20 @@ import os
 
 # Directory to save images and masks
 dataset_dir = 'data'
-os.makedirs(os.path.join(dataset_dir, 'images'), exist_ok=True)
-os.makedirs(os.path.join(dataset_dir, 'masks'), exist_ok=True)
+os.makedirs(dataset_dir, exist_ok=True)
 
-# Directory with node images
+
 image_dir = 'node_images'
-
-# Define unique grayscale values for each device type in the mask
-device_labels = {
-    "router": 50,
-    "switch": 100,
-    "computer": 150,
-    "firewall": 200,
-    "server": 250
-}
 
 def get_image(name):
     img_path = os.path.join(image_dir, f"{name}.png")
     return plt.imread(img_path)
+
+def apply_color_overlay(image, color):
+    colored_image = np.zeros_like(image)
+    colored_image[..., :3] = color[:3]
+    colored_image[..., 3] = image[..., 3]
+    return colored_image
 
 def generate_random_ip():
     return f"{random.randint(192, 223)}.{random.randint(0, 255)}.{random.randint(0, 255)}.{random.randint(1, 254)}"
@@ -69,7 +66,6 @@ def create_random_network_diagram(file_index):
         for server in connected_servers:
             G.add_edge(switch, server)
 
-    # Define layout and keep the same layout for mask and image
     pos = nx.spring_layout(G, seed=random.randint(0, 100), k=0.8, iterations=20)
     
     # Create figure for the network diagram
@@ -104,15 +100,10 @@ def create_random_network_diagram(file_index):
     plt.savefig(os.path.join(dataset_dir, "images", f"network_diagram_{file_index}.png"), bbox_inches="tight")
     plt.close(fig)
 
-    # Save the mask
-    mask.save(os.path.join(dataset_dir, "masks", f"mask_{file_index}.png"))
-
-# Generate diagrams and masks
-for i in range(10):  # Generate a few for testing first
+for i in range(2000):
     create_random_network_diagram(i)
 
-print(f"Generated network diagrams with corresponding masks in '{dataset_dir}' directory.")
-
+print(f"Generated 10 unique network diagrams with custom images in the '{dataset_dir}' directory.")
 
 
 
